@@ -338,7 +338,6 @@ function exportHtml() {
   downloadBlob(blob, 'AbhiTypeDocument.html');
 }
 
-// PDF Export with Color
 async function exportPdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -357,11 +356,22 @@ async function exportPdf() {
     } else if (node.nodeType === 1) {
       let color = window.getComputedStyle(node).color;
       let rgb = color.match(/\d+/g);
+
       if (rgb) {
-        doc.setTextColor(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
+        const r = parseInt(rgb[0]);
+        const g = parseInt(rgb[1]);
+        const b = parseInt(rgb[2]);
+
+        // Check if color is close to white
+        if (r > 200 && g > 200 && b > 200) {
+          doc.setTextColor(0, 0, 0);  // Force black
+        } else {
+          doc.setTextColor(r, g, b);
+        }
       } else {
         doc.setTextColor(0, 0, 0);
       }
+
       node.childNodes.forEach(processNode);
     }
   }
