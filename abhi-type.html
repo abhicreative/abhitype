@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Abhi Type</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap"
+    rel="stylesheet"
+  />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.7.0/docx.umd.min.js"></script>
   <style>
     :root {
       --bg-color: #121212;
@@ -15,6 +17,10 @@
       --text-color: #f2f2f2;
       --toolbar-bg: #1a1a1a;
       --border: #333;
+      --dropdown-bg: #2a2a2a;
+      --dropdown-hover-bg: #3a3a3a;
+      --dropdown-border: #444;
+      --medium-grey: #666666;
     }
     * {
       box-sizing: border-box;
@@ -38,13 +44,20 @@
       z-index: 10;
       flex-wrap: wrap;
     }
-    .left-tools, .right-tools {
+    .left-tools {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      position: relative;
+    }
+    .right-tools {
+      display: flex;
+      gap: 10px;
       align-items: center;
     }
-    input[type="number"], input[type="color"], button, select {
+    input[type='number'],
+    input[type='color'],
+    button {
       background: #2a2a2a;
       color: var(--text-color);
       border: 1px solid var(--border);
@@ -54,7 +67,7 @@
       font-size: 0.9rem;
       cursor: pointer;
     }
-    input[type="number"] {
+    input[type='number'] {
       width: 70px;
     }
     .zoom-buttons button {
@@ -80,7 +93,11 @@
       font-size: 16px;
       line-height: 1.6;
       color: #ffffff;
-      transform-origin: top center;
+      outline: none;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      min-height: 100%;
+      user-select: text;
     }
     .page:focus {
       outline: none;
@@ -97,36 +114,273 @@
       position: fixed;
       bottom: 0;
       width: 100%;
+      z-index: 20;
     }
     #counter {
       cursor: pointer;
+      position: relative;
+      z-index: 21;
     }
-    #fileInput {
+
+    /* Custom dropdown styles */
+    .custom-dropdown {
+      position: relative;
+      user-select: none;
+      cursor: pointer;
+      background: var(--dropdown-bg);
+      border: 1px solid var(--dropdown-border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: var(--text-color);
+      font-family: inherit;
+      font-size: 0.9rem;
+      min-width: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .custom-dropdown:hover {
+      background: var(--dropdown-hover-bg);
+    }
+    .custom-dropdown .selected {
+      pointer-events: none;
+    }
+    .custom-dropdown .arrow {
+      border: solid var(--text-color);
+      border-width: 0 2px 2px 0;
+      display: inline-block;
+      padding: 3px;
+      margin-left: 8px;
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+    }
+    .dropdown-list {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      background: var(--dropdown-bg);
+      border: 1px solid var(--dropdown-border);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
       display: none;
+      flex-direction: column;
+      margin-bottom: 6px;
+    }
+    .dropdown-list.open {
+      display: flex;
+    }
+    .dropdown-list div {
+      padding: 6px 10px;
+      cursor: pointer;
+      color: var(--medium-grey);
+    }
+    .dropdown-list div:hover {
+      background: var(--dropdown-hover-bg);
+      color: var(--text-color);
+    }
+
+    /* Popup overlay */
+    #pagePopupOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #pagePopup {
+      background: var(--editor-bg);
+      padding: 20px 30px;
+      border-radius: 10px;
+      color: var(--text-color);
+      box-shadow: 0 0 15px #000;
+      text-align: center;
+      max-width: 320px;
+      font-size: 1.2rem;
+      font-family: 'Fira Code', monospace;
+    }
+    #pagePopup button {
+      margin: 15px 10px 0 10px;
+      padding: 8px 18px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #3a3a3a;
+      color: var(--text-color);
+      transition: background 0.2s ease;
+    }
+    #pagePopup button:hover {
+      background: #555;
+    }
+
+    /* Floating remove page container */
+    #removePageContainer {
+      position: fixed;
+      bottom: 35px;
+      left: 15px;
+      background: var(--editor-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 30;
+      color: var(--text-color);
+      user-select: none;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      min-width: 220px;
+    }
+    #removePageDropdown {
+      flex-grow: 1;
+      position: relative;
+      user-select: none;
+      z-index: 1000; /* make sure dropdown appears above buttons */
+    }
+    #removePageDropdown .selected {
+      background: var(--dropdown-bg);
+      border: 1px solid var(--dropdown-border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: var(--medium-grey);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1001;
+    }
+    #removePageDropdown .selected:hover {
+      background: var(--dropdown-hover-bg);
+      color: var(--text-color);
+    }
+    #removePageDropdown .arrow {
+      border: solid var(--medium-grey);
+      border-width: 0 2px 2px 0;
+      display: inline-block;
+      padding: 3px;
+      margin-left: 8px;
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+      transition: border-color 0.2s ease;
+    }
+    #removePageDropdown.open .arrow {
+      transform: rotate(-135deg);
+      border-color: var(--text-color);
+    }
+    #removePageDropdown.open .selected {
+      background: var(--dropdown-hover-bg);
+      color: var(--text-color);
+    }
+    #removePageDropdown .dropdown-list {
+      position: absolute;
+      bottom: 100%; /* open above */
+      left: 0;
+      right: 0;
+      background: var(--dropdown-bg);
+      border: 1px solid var(--dropdown-border);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      flex-direction: column;
+      margin-bottom: 6px;
+      z-index: 1002;
+    }
+    #removePageDropdown.open .dropdown-list {
+      display: flex;
+    }
+    #removePageDropdown .dropdown-list div {
+      padding: 6px 10px;
+      cursor: pointer;
+      color: var(--medium-grey);
+    }
+    #removePageDropdown .dropdown-list div:hover {
+      background: var(--dropdown-hover-bg);
+      color: var(--text-color);
+    }
+    #removePageBtn {
+      background: #c0392b;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      user-select: none;
+    }
+    #removePageBtn:hover {
+      background: #e74c3c;
+    }
+    #addPageBtn {
+      background: #2980b9;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      user-select: none;
+    }
+    #addPageBtn:hover {
+      background: #3498db;
     }
   </style>
 </head>
 <body>
   <div id="toolbar">
     <div class="left-tools">
-      <select onchange="execCmd(this.value)">
-        <option selected disabled>Text</option>
-        <option value="bold">Bold</option>
-        <option value="italic">Italic</option>
-        <option value="underline">Underline</option>
-      </select>
-      <select onchange="execCmd(this.value)">
-        <option selected disabled>Lists</option>
-        <option value="insertUnorderedList">• Bullet list</option>
-        <option value="insertOrderedList">1. Numbered list</option>
-      </select>
-      <select onchange="execCmd(this.value)">
-        <option selected disabled>Align</option>
-        <option value="justifyLeft">Left</option>
-        <option value="justifyCenter">Center</option>
-        <option value="justifyRight">Right</option>
-      </select>
-      <input type="number" id="fontSizeInput" min="8" max="60" step="2" value="16" title="Font size" />
+      <!-- Custom Dropdown: Text -->
+      <div class="custom-dropdown" id="dropdownText" tabindex="0">
+        <span class="selected">Text</span>
+        <i class="arrow"></i>
+        <div class="dropdown-list" aria-label="Text formatting options">
+          <div data-cmd="bold">Bold</div>
+          <div data-cmd="italic">Italic</div>
+          <div data-cmd="underline">Underline</div>
+        </div>
+      </div>
+
+      <!-- Custom Dropdown: Lists -->
+      <div class="custom-dropdown" id="dropdownList" tabindex="0">
+        <span class="selected">Lists</span>
+        <i class="arrow"></i>
+        <div class="dropdown-list" aria-label="List options">
+          <div data-cmd="insertUnorderedList">• Bullet list</div>
+          <div data-cmd="insertOrderedList">1. Numbered list</div>
+        </div>
+      </div>
+
+      <!-- Custom Dropdown: Align -->
+      <div class="custom-dropdown" id="dropdownAlign" tabindex="0">
+        <span class="selected">Align</span>
+        <i class="arrow"></i>
+        <div class="dropdown-list" aria-label="Text alignment options">
+          <div data-cmd="justifyLeft">Left</div>
+          <div data-cmd="justifyCenter">Center</div>
+          <div data-cmd="justifyRight">Right</div>
+        </div>
+      </div>
+
+      <input
+        type="number"
+        id="fontSizeInput"
+        min="8"
+        max="60"
+        step="2"
+        value="16"
+        title="Font size"
+      />
       <label style="font-size: 0.8rem;">Text</label>
       <input type="color" id="colorPicker" title="Text color" value="#ffffff" />
       <label style="font-size: 0.8rem;">Highlight</label>
@@ -139,7 +393,6 @@
         <button onclick="adjustZoom(0.1)">+</button>
       </div>
       <div>
-        <button onclick="downloadDocx()">💾 DOCX</button>
         <button onclick="exportPDF()">📄 PDF</button>
         <button onclick="exportHTML()">🌐 HTML</button>
         <button onclick="exportTXT()">📄 TXT</button>
@@ -150,177 +403,580 @@
   </div>
 
   <div id="editorWrapper">
-    <div class="page" contenteditable="true" oninput="handleTyping(this)"></div>
+    <!-- Pages go here -->
   </div>
 
-  <input type="file" id="fileInput" accept=".txt,.html" onchange="handleImport(event)">
+  <input type="file" id="fileInput" accept=".txt,.html" onchange="handleImport(event)" style="display:none" />
+
   <div id="footer">
     <div id="counter" onclick="toggleCounter()">Words: 0</div>
     <div><strong>Abhi Type</strong></div>
   </div>
 
+  <!-- Popup for new page creation -->
+  <div
+    id="pagePopupOverlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="pagePopupMessage"
+    tabindex="-1"
+  >
+    <div id="pagePopup">
+      <div id="pagePopupMessage">Would you like to create another page?</div>
+      <button id="popupYesBtn">Yes</button>
+      <button id="popupNoBtn">No</button>
+    </div>
+  </div>
+
+  <!-- Floating Remove Page Container -->
+  <div id="removePageContainer" aria-label="Page controls">
+    <div id="removePageDropdown" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Select page to remove">
+      <div class="selected" aria-live="polite" aria-atomic="true" data-selected-index="0">
+        Page 1
+        <i class="arrow"></i>
+      </div>
+      <div class="dropdown-list" role="listbox" tabindex="-1" aria-label="Page list"></div>
+    </div>
+    <button id="removePageBtn" aria-label="Remove selected page">Remove</button>
+    <button id="addPageBtn" aria-label="Add new page">Add Page</button>
+  </div>
+
   <script>
-    const wrapper = document.getElementById('editorWrapper');
     const fontSizeInput = document.getElementById('fontSizeInput');
     const colorPicker = document.getElementById('colorPicker');
     const highlightPicker = document.getElementById('highlightPicker');
     const counter = document.getElementById('counter');
+    const wrapper = document.getElementById('editorWrapper');
+    const pagePopupOverlay = document.getElementById('pagePopupOverlay');
+    const popupYesBtn = document.getElementById('popupYesBtn');
+    const popupNoBtn = document.getElementById('popupNoBtn');
+    const removePageDropdown = document.getElementById('removePageDropdown');
+    const removePageBtn = document.getElementById('removePageBtn');
+    const addPageBtn = document.getElementById('addPageBtn');
+    const removePageSelected = removePageDropdown.querySelector('.selected');
+    const dropdownList = removePageDropdown.querySelector('.dropdown-list');
+
     let countMode = 'words';
     let zoomLevel = 1;
     let currentTextColor = '#ffffff';
     let currentHighlightColor = 'transparent';
+    let popupActive = false;
 
-    function execCmd(command, value = null) {
-      document.execCommand(command, false, value);
-      updateCounter();
-    }
+    // Pending styles for next typed text
+    let pendingFontSize = null;
+    let pendingTextColor = null;
+    let pendingHighlightColor = null;
 
-    function updateCounter() {
-      const text = [...document.querySelectorAll('.page')].map(p => p.innerText).join(" ");
-      const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-      counter.textContent = countMode === 'words' ? `Words: ${wordCount}` : `Chars: ${text.length}`;
-    }
+    // Custom dropdown elements (toolbar ones)
+    const dropdowns = [
+      { container: document.getElementById('dropdownText') },
+      { container: document.getElementById('dropdownList') },
+      { container: document.getElementById('dropdownAlign') }
+    ];
 
-    function toggleCounter() {
-      countMode = countMode === 'words' ? 'chars' : 'words';
-      updateCounter();
-    }
+    // Initialize toolbar dropdowns
+    dropdowns.forEach(({ container }) => {
+      const selected = container.querySelector('.selected');
+      const list = container.querySelector('.dropdown-list');
 
-    function handleTyping(page) {
-      updateCounter();
-      const pages = document.querySelectorAll('.page');
-      const isLast = page === pages[pages.length - 1];
-      const contentNotEmpty = page.innerText.trim().length > 0;
-      if (isLast && contentNotEmpty && page.scrollHeight > page.clientHeight + 40) {
-        const newPage = createPage('');
-        wrapper.appendChild(newPage);
-        newPage.focus();
+      container.addEventListener('click', () => {
+        if (popupActive) return;
+        closeAllDropdowns(container);
+        list.classList.toggle('open');
+      });
+
+      list.querySelectorAll('div').forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (popupActive) return;
+          const cmd = option.getAttribute('data-cmd');
+          execCmd(cmd);
+          selected.textContent = option.textContent;
+          list.classList.remove('open');
+        });
+      });
+
+      container.addEventListener('keydown', e => {
+        if (popupActive) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          container.click();
+        } else if (e.key === 'Escape') {
+          list.classList.remove('open');
+        }
+      });
+    });
+
+    function closeAllDropdowns(except = null) {
+      dropdowns.forEach(({ container }) => {
+        if (container !== except) {
+          container.querySelector('.dropdown-list').classList.remove('open');
+        }
+      });
+      // Also close removePageDropdown if except is not it
+      if (except !== removePageDropdown) {
+        removePageDropdown.classList.remove('open');
+        removePageDropdown.setAttribute('aria-expanded', 'false');
       }
+    }
+
+    // Font size input
+    fontSizeInput.addEventListener('change', () => {
+      let val = parseInt(fontSizeInput.value);
+      if (val < 8) val = 8;
+      if (val > 60) val = 60;
+      pendingFontSize = val;
+      execCmd('fontSize', '7'); // font size 7 is max, we override with style below
+      const fonts = document.getElementsByTagName('font');
+      for (const fontElem of fonts) {
+        if (fontElem.size === '7') {
+          fontElem.removeAttribute('size');
+          fontElem.style.fontSize = val + 'px';
+        }
+      }
+      pendingFontSize = null;
+      saveToLocalStorage();
+    });
+
+    // Color pickers
+    colorPicker.addEventListener('change', () => {
+      pendingTextColor = colorPicker.value;
+      execCmd('foreColor', pendingTextColor);
+      pendingTextColor = null;
+      currentTextColor = colorPicker.value;
+      saveToLocalStorage();
+    });
+
+    highlightPicker.addEventListener('change', () => {
+      pendingHighlightColor = highlightPicker.value;
+      execCmd('hiliteColor', pendingHighlightColor);
+      pendingHighlightColor = null;
+      currentHighlightColor = highlightPicker.value;
+      saveToLocalStorage();
+    });
+
+    // Remove highlight button
+    function removeHighlight() {
+      execCmd('hiliteColor', 'transparent');
+      pendingHighlightColor = 'transparent';
+      highlightPicker.value = '#000000';
+      currentHighlightColor = 'transparent';
       saveToLocalStorage();
     }
+    window.removeHighlight = removeHighlight;
 
-    function createPage(content = '') {
-      const page = document.createElement('div');
-      page.className = 'page';
-      page.contentEditable = true;
-      page.innerHTML = content;
-      page.setAttribute('oninput', 'handleTyping(this)');
-      return page;
-    }
-
-    function adjustZoom(change) {
-      zoomLevel = Math.min(2, Math.max(0.5, zoomLevel + change));
-      document.querySelectorAll('.page').forEach(page => {
+    // Zoom
+    function adjustZoom(amount) {
+      zoomLevel += amount;
+      if (zoomLevel < 0.3) zoomLevel = 0.3;
+      if (zoomLevel > 3) zoomLevel = 3;
+      [...document.querySelectorAll('.page')].forEach(page => {
         page.style.transform = `scale(${zoomLevel})`;
+        page.style.transformOrigin = 'top left';
       });
     }
+    window.adjustZoom = adjustZoom;
 
-    fontSizeInput.addEventListener('input', () => {
-      const size = Math.max(8, Math.min(60, parseInt(fontSizeInput.value)));
-      document.querySelectorAll('.page').forEach(p => p.style.fontSize = size + 'px');
-    });
-
-    colorPicker.addEventListener('input', () => {
-      currentTextColor = colorPicker.value;
-      execCmd('foreColor', currentTextColor);
-    });
-
-    highlightPicker.addEventListener('input', () => {
-      currentHighlightColor = highlightPicker.value;
-      execCmd('hiliteColor', currentHighlightColor);
-    });
-
-    function removeHighlight() {
-      currentHighlightColor = 'transparent';
-      execCmd('hiliteColor', 'transparent');
-    }
-
-    document.addEventListener('selectionchange', () => {
-      document.execCommand('styleWithCSS', false, true);
-      document.execCommand('foreColor', false, currentTextColor);
-      document.execCommand('hiliteColor', false, currentHighlightColor);
-    });
-
+    // Save to local storage
     function saveToLocalStorage() {
       const data = [...document.querySelectorAll('.page')].map(p => p.innerHTML);
       localStorage.setItem('abhiTypeDocPages', JSON.stringify(data));
     }
 
-    function clearAllPages() {
-      if (confirm("Are you sure you want to clear the document?")) {
-        wrapper.innerHTML = '';
-        wrapper.appendChild(createPage());
-        localStorage.removeItem('abhiTypeDocPages');
-        updateCounter();
-      }
-    }
-
-    async function downloadDocx() {
-      const { Document, Packer, Paragraph } = window.docx;
-      const doc = new Document();
-      const children = [];
-
-      document.querySelectorAll('.page').forEach(page => {
-        page.innerText.split('\\n').forEach(line => {
-          children.push(new Paragraph(line));
-        });
-        children.push(new Paragraph('')); // page break
-      });
-
-      doc.addSection({ children });
-      const blob = await Packer.toBlob(doc);
-      saveAs(blob, 'AbhiType.docx');
-      localStorage.removeItem('abhiTypeDocPages');
-    }
-
-    function exportPDF() {
-      html2pdf().from(wrapper).set({
-        margin: 10,
-        filename: 'AbhiType.pdf',
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      }).save();
-      localStorage.removeItem('abhiTypeDocPages');
-    }
-
-    function exportHTML() {
-      const pages = document.querySelectorAll('.page');
-      const content = [...pages].map(p => p.innerHTML).join('<hr>');
-      const blob = new Blob([`<html><body>${content}</body></html>`], { type: 'text/html' });
-      saveAs(blob, 'AbhiType.html');
-      localStorage.removeItem('abhiTypeDocPages');
-    }
-
-    function exportTXT() {
-      const text = [...document.querySelectorAll('.page')].map(p => p.innerText).join('\\n\\n');
-      const blob = new Blob([text], { type: 'text/plain' });
-      saveAs(blob, 'AbhiType.txt');
-      localStorage.removeItem('abhiTypeDocPages');
-    }
-
-    function handleImport(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        wrapper.innerHTML = '';
-        wrapper.appendChild(createPage(e.target.result));
-        saveToLocalStorage();
-        updateCounter();
-      };
-      reader.readAsText(file);
-    }
-
+    // Load from local storage or create new page
     window.onload = () => {
       const saved = localStorage.getItem('abhiTypeDocPages');
       wrapper.innerHTML = '';
       if (saved) {
-        JSON.parse(saved).forEach(content => wrapper.appendChild(createPage(content)));
-      } else {
-        wrapper.appendChild(createPage());
+        JSON.parse(saved).forEach(content => {
+          const page = document.createElement('div');
+          page.className = 'page';
+          page.contentEditable = true;
+          page.innerHTML = content;
+          attachPageEvents(page);
+          wrapper.appendChild(page);
+        });
       }
+      if (wrapper.children.length === 0) {
+        addNewPage();
+      }
+      updateRemovePageDropdown();
       updateCounter();
     };
+
+    // Add new page function
+    function addNewPage() {
+      const newPage = document.createElement('div');
+      newPage.className = 'page';
+      newPage.contentEditable = true;
+      newPage.style.fontSize = fontSizeInput.value + 'px';
+      attachPageEvents(newPage);
+      wrapper.appendChild(newPage);
+      newPage.focus();
+      updateRemovePageDropdown();
+      updateCounter();
+      saveToLocalStorage();
+    }
+
+    // Attach events to a page
+    function attachPageEvents(page) {
+      page.setAttribute('oninput', 'handleTyping(this)');
+      page.setAttribute('onkeydown', 'handleKeyDown(event, this)');
+      page.addEventListener('paste', (e) => {
+        // Optional: clean paste here
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        document.execCommand('insertText', false, text);
+      });
+    }
+
+    // Remove page dropdown toggle
+    removePageDropdown.querySelector('.selected').addEventListener('click', () => {
+      if (popupActive) return;
+      const isOpen = removePageDropdown.classList.toggle('open');
+      removePageDropdown.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Update remove page dropdown list dynamically
+    function updateRemovePageDropdown() {
+      dropdownList.innerHTML = '';
+      const pages = [...document.querySelectorAll('.page')];
+      pages.forEach((page, i) => {
+        const div = document.createElement('div');
+        div.textContent = `Page ${i + 1}`;
+        div.style.color = 'var(--medium-grey)';
+        div.setAttribute('role', 'option');
+        div.setAttribute('tabindex', '0');
+        div.addEventListener('click', () => {
+          removePageSelected.textContent = div.textContent;
+          removePageDropdown.classList.remove('open');
+          removePageDropdown.setAttribute('aria-expanded', 'false');
+          removePageSelected.appendChild(createArrowIcon());
+          removePageSelected.setAttribute('data-selected-index', i);
+        });
+        div.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            div.click();
+          }
+        });
+        dropdownList.appendChild(div);
+      });
+      // Select last page by default
+      if (pages.length > 0) {
+        removePageSelected.textContent = `Page ${pages.length}`;
+        removePageSelected.setAttribute('data-selected-index', pages.length - 1);
+        removePageSelected.appendChild(createArrowIcon());
+      }
+    }
+
+    function createArrowIcon() {
+      const arrow = document.createElement('i');
+      arrow.className = 'arrow';
+      return arrow;
+    }
+
+    // Remove page button handler
+    removePageBtn.addEventListener('click', () => {
+      if (popupActive) return;
+      const selectedIndex = parseInt(removePageSelected.getAttribute('data-selected-index'), 10);
+      const pages = document.querySelectorAll('.page');
+      if (pages.length <= 1) {
+        alert('Cannot remove the last page.');
+        return;
+      }
+      if (selectedIndex >= 0 && selectedIndex < pages.length) {
+        pages[selectedIndex].remove();
+        updateRemovePageDropdown();
+        updateCounter();
+        saveToLocalStorage();
+        // Focus previous or first page
+        const newPages = document.querySelectorAll('.page');
+        let focusIndex = selectedIndex - 1;
+        if (focusIndex < 0) focusIndex = 0;
+        if (newPages.length > 0) newPages[focusIndex].focus();
+      }
+    });
+
+    // Add page button handler
+    addPageBtn.addEventListener('click', () => {
+      if (popupActive) return;
+      addNewPage();
+    });
+
+    // Show popup and block input
+    function showPopup() {
+      popupActive = true;
+      pagePopupOverlay.style.display = 'flex';
+      pagePopupOverlay.focus();
+    }
+    function hidePopup() {
+      popupActive = false;
+      pagePopupOverlay.style.display = 'none';
+    }
+
+    popupYesBtn.addEventListener('click', () => {
+      addNewPage();
+      hidePopup();
+    });
+    popupNoBtn.addEventListener('click', () => {
+      hidePopup();
+    });
+
+    // Handle typing event on a page
+    window.handleTyping = function (page) {
+      updateCounter();
+      applyPendingStylesToSelectionOrNextTyped();
+
+      // If page content overflows its height, show popup only if last page
+      if (page.scrollHeight > page.clientHeight) {
+        const pages = document.querySelectorAll('.page');
+        if (page === pages[pages.length - 1] && !popupActive) {
+          showPopup();
+        }
+      }
+      saveToLocalStorage();
+    };
+
+    // Handle keydown event on page: for Enter and Backspace list logic
+    window.handleKeyDown = function (event, page) {
+      if (popupActive) {
+        event.preventDefault();
+        return; // block typing while popup active
+      }
+      if (event.key === 'Enter') {
+        // Handle auto continuation of lists
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        let container = range.startContainer;
+
+        // Find the closest LI or contenteditable DIV parent
+        while (container && container !== page && container.nodeName !== 'LI' && container.nodeName !== 'DIV') {
+          container = container.parentNode;
+        }
+
+        // If inside a list item (LI), handle continuation
+        if (container && container.nodeName === 'LI') {
+          event.preventDefault();
+
+          const liText = container.textContent.trim();
+
+          // If current li is empty, remove the list (exit list)
+          if (liText === '') {
+            document.execCommand('outdent'); // outdent to remove list formatting
+            return;
+          }
+
+          // Insert new list item
+          document.execCommand('insertHTML', false, '<li><br></li>');
+          return;
+        }
+
+        // If inside contenteditable but not in LI, fallback normal enter
+      }
+
+      if (event.key === 'Backspace') {
+        // Remove list formatting if current line is empty list item
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        let container = range.startContainer;
+
+        // Find closest LI or contenteditable DIV parent
+        while (container && container !== page && container.nodeName !== 'LI' && container.nodeName !== 'DIV') {
+          container = container.parentNode;
+        }
+
+        if (container && container.nodeName === 'LI') {
+          const liText = container.textContent.trim();
+          if (liText === '') {
+            event.preventDefault();
+            document.execCommand('outdent'); // remove list formatting (outdent)
+          }
+        }
+      }
+    };
+
+    // Exec command helper
+    function execCmd(command, value = null) {
+      document.execCommand(command, false, value);
+      updateCounter();
+      saveToLocalStorage();
+    }
+
+    // Update word or char count
+    function updateCounter() {
+      const pages = [...document.querySelectorAll('.page')];
+      let text = pages.map(p => p.innerText).join(' ');
+      let count;
+      if (countMode === 'words') {
+        count = text.trim().split(/\s+/).filter(Boolean).length;
+        counter.textContent = `Words: ${count}`;
+      } else {
+        count = text.length;
+        counter.textContent = `Characters: ${count}`;
+      }
+    }
+
+    // Toggle word/character count
+    window.toggleCounter = function () {
+      countMode = countMode === 'words' ? 'chars' : 'words';
+      updateCounter();
+    };
+
+    // Apply pending styles to selection or next typed text
+    function applyPendingStylesToSelectionOrNextTyped() {
+      const selection = window.getSelection();
+      if (!selection) return;
+
+      if (!selection.isCollapsed) {
+        pendingFontSize = null;
+        pendingTextColor = null;
+        pendingHighlightColor = null;
+        return;
+      }
+
+      if (pendingFontSize !== null) {
+        execCmd('fontSize', '7');
+        const fonts = document.getElementsByTagName('font');
+        for (const fontElem of fonts) {
+          if (fontElem.size === '7') {
+            fontElem.removeAttribute('size');
+            fontElem.style.fontSize = pendingFontSize + 'px';
+          }
+        }
+        pendingFontSize = null;
+      }
+      if (pendingTextColor !== null) {
+        execCmd('foreColor', pendingTextColor);
+        pendingTextColor = null;
+      }
+      if (pendingHighlightColor !== null) {
+        execCmd('hiliteColor', pendingHighlightColor);
+        pendingHighlightColor = null;
+      }
+    }
+
+    // Export functions
+    window.exportPDF = function () {
+      if (popupActive) return;
+      const exportWrapper = wrapper.cloneNode(true);
+      exportWrapper.style.backgroundColor = 'white';
+      exportWrapper.style.color = 'black';
+      exportWrapper.querySelectorAll('.page').forEach(page => {
+        page.style.backgroundColor = 'white';
+        page.style.color = 'black';
+        page.style.boxShadow = 'none';
+      });
+      html2pdf()
+        .from(exportWrapper)
+        .set({
+          margin: 10,
+          filename: 'AbhiType.pdf',
+          html2canvas: { scale: 2, backgroundColor: '#ffffff' },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        })
+        .save();
+      localStorage.removeItem('abhiTypeDocPages');
+    };
+
+    window.exportHTML = function () {
+      if (popupActive) return;
+      const pages = document.querySelectorAll('.page');
+      const content = [...pages]
+        .map(p => p.innerHTML)
+        .join('<hr style="border-color:#ccc;margin:20px 0;">');
+      const htmlContent = `
+        <html>
+          <head>
+            <meta charset="UTF-8" />
+            <title>AbhiType Export</title>
+            <style>
+              body { background: white; color: black; font-family: monospace; padding: 40px; }
+              hr { border: 1px solid #ccc; margin: 20px 0; }
+            </style>
+          </head>
+          <body>${content}</body>
+        </html>
+      `;
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      saveAs(blob, 'AbhiType.html');
+      localStorage.removeItem('abhiTypeDocPages');
+    };
+
+    window.exportTXT = function () {
+      if (popupActive) return;
+      const text = [...document.querySelectorAll('.page')]
+        .map(p => p.innerText)
+        .join('\n\n');
+      const blob = new Blob([text], { type: 'text/plain' });
+      saveAs(blob, 'AbhiType.txt');
+      localStorage.removeItem('abhiTypeDocPages');
+    };
+
+    // Import handler
+    window.handleImport = function (event) {
+      if (popupActive) return;
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        wrapper.innerHTML = '';
+        const newPage = document.createElement('div');
+        newPage.className = 'page';
+        newPage.contentEditable = true;
+        newPage.innerHTML = e.target.result;
+        attachPageEvents(newPage);
+        wrapper.appendChild(newPage);
+        updateRemovePageDropdown();
+        saveToLocalStorage();
+        updateCounter();
+      };
+      if (file.name.endsWith('.txt')) {
+        reader.readAsText(file);
+      } else if (file.name.endsWith('.html')) {
+        reader.readAsText(file);
+      }
+    };
+
+    // Clear all pages
+    window.clearAllPages = function () {
+      if (popupActive) return;
+      if (confirm('Are you sure you want to clear the document?')) {
+        wrapper.innerHTML = '';
+        addNewPage();
+        updateRemovePageDropdown();
+        localStorage.removeItem('abhiTypeDocPages');
+        updateCounter();
+      }
+    };
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!removePageDropdown.contains(e.target)) {
+        removePageDropdown.classList.remove('open');
+        removePageDropdown.setAttribute('aria-expanded', 'false');
+      }
+      dropdowns.forEach(({ container }) => {
+        if (!container.contains(e.target)) {
+          container.querySelector('.dropdown-list').classList.remove('open');
+        }
+      });
+    });
+
+    // Accessibility: close dropdowns on ESC key globally
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        removePageDropdown.classList.remove('open');
+        removePageDropdown.setAttribute('aria-expanded', 'false');
+        dropdowns.forEach(({ container }) => {
+          container.querySelector('.dropdown-list').classList.remove('open');
+        });
+      }
+    });
   </script>
 </body>
 </html>
