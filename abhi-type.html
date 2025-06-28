@@ -6,8 +6,8 @@
   <title>Abhi Type</title>
   <style>
     body, html {
-      margin: 0; 
-      padding: 0; 
+      margin: 0;
+      padding: 0;
       height: 100%;
       background: #121212;
       color: #eee;
@@ -16,35 +16,25 @@
       flex-direction: column;
       user-select: text;
     }
-
     header {
       background: #1f1f1f;
       padding: 10px 20px;
       display: flex;
       align-items: center;
       border-bottom: 1px solid #333;
-      font-family: 'Courier New', Courier, monospace;
-      position: relative;
-      z-index: 10;
     }
-
     header h1 {
       margin: 0;
       font-weight: normal;
       font-size: 1.5rem;
       color: #ddd;
-      user-select: none;
       flex-grow: 1;
+      user-select: none;
     }
-
     #toolbar {
       display: flex;
       gap: 10px;
-      font-family: 'Courier New', Courier, monospace;
-      position: relative;
-      align-items: center;
     }
-
     button {
       background: #2a2a2a;
       border: none;
@@ -57,25 +47,19 @@
       user-select: none;
       font-family: 'Courier New', Courier, monospace;
     }
-
     button:hover {
       background: #444;
       color: white;
     }
-
     button:active {
       background: #555;
     }
-
     #exportBtn {
       position: relative;
-      user-select: none;
       display: flex;
       align-items: center;
       gap: 6px;
-      font-weight: normal;
     }
-
     #exportMenu {
       position: absolute;
       top: 38px;
@@ -87,10 +71,8 @@
       display: none;
       flex-direction: column;
       min-width: 120px;
-      font-family: 'Courier New', Courier, monospace;
       z-index: 100;
     }
-
     #exportMenu button {
       background: transparent;
       border: none;
@@ -98,39 +80,29 @@
       padding: 8px 12px;
       text-align: left;
       cursor: pointer;
-      border-radius: 0;
     }
     #exportMenu button:hover {
       background: #444;
       color: white;
     }
-
     #editor {
       flex-grow: 1;
-      margin: 0;
       padding: 20px;
       background: #181818;
       color: #eee;
       outline: none;
-      border: none;
       overflow-y: auto;
-      font-family: 'Courier New', Courier, monospace;
       font-size: 1.1rem;
       line-height: 1.5;
       white-space: pre-wrap;
       word-wrap: break-word;
-      -webkit-font-smoothing: antialiased;
-      tab-size: 4;
       min-height: 300px;
     }
-
     #editor:empty::before {
       content: "Start typing...";
       color: #666;
       pointer-events: none;
-      user-select: none;
     }
-
     footer {
       background: #1f1f1f;
       padding: 10px 20px;
@@ -139,10 +111,7 @@
       text-align: center;
       border-top: 1px solid #333;
       user-select: none;
-      font-family: 'Courier New', Courier, monospace;
     }
-
-    /* Style the color input to fit the toolbar */
     #textColorPicker {
       width: 32px;
       height: 32px;
@@ -151,354 +120,264 @@
       cursor: pointer;
       padding: 0;
       border-radius: 4px;
-      vertical-align: middle;
-    }
-
-    #textColorPicker::-webkit-color-swatch-wrapper {
-      padding: 0;
-    }
-    #textColorPicker::-webkit-color-swatch {
-      border-radius: 4px;
-    }
-
-    @media (max-width: 600px) {
-      #toolbar {
-        flex-wrap: wrap;
-      }
-      button, #exportBtn {
-        flex: 1 1 30%;
-      }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Abhi Type</h1>
-    <div id="toolbar" role="toolbar" aria-label="Text formatting toolbar">
-      <button type="button" title="Bold (Ctrl+B)" data-command="bold" aria-label="Bold"><b>B</b></button>
-      <button type="button" title="Italic (Ctrl+I)" data-command="italic" aria-label="Italic"><i>I</i></button>
-      <button type="button" title="Underline (Ctrl+U)" data-command="underline" aria-label="Underline"><u>U</u></button>
-
-      <!-- Text color picker -->
-      <input type="color" id="textColorPicker" title="Text Color" aria-label="Text color picker" />
-
-      <button type="button" title="Bullet List" data-command="insertUnorderedList" aria-label="Bullet List">• List</button>
-      <button type="button" title="Numbered List" data-command="insertOrderedList" aria-label="Numbered List">1. List</button>
-      <button type="button" title="Undo (Ctrl+Z)" id="undoBtn" aria-label="Undo">Undo</button>
-      <button type="button" title="Redo (Ctrl+Y)" id="redoBtn" aria-label="Redo">Redo</button>
-      <button type="button" title="Clear Formatting" id="clearBtn" aria-label="Clear formatting">Clear</button>
-
-      <div id="exportContainer" style="position:relative;">
-        <button id="exportBtn" aria-haspopup="true" aria-expanded="false" aria-controls="exportMenu" title="Export document">
-          Export ▼
-        </button>
-        <div id="exportMenu" role="menu" aria-label="Export options">
-          <button role="menuitem" data-export="pdf">Export as PDF</button>
-          <button role="menuitem" data-export="txt">Export as TXT</button>
-          <button role="menuitem" data-export="html">Export as HTML</button>
-        </div>
+<header>
+  <h1>Abhi Type</h1>
+  <div id="toolbar">
+    <button data-command="bold"><b>B</b></button>
+    <button data-command="italic"><i>I</i></button>
+    <button data-command="underline"><u>U</u></button>
+    <input type="color" id="textColorPicker" title="Text Color" />
+    <button data-command="insertUnorderedList">• List</button>
+    <button data-command="insertOrderedList">1. List</button>
+    <button id="undoBtn">Undo</button>
+    <button id="redoBtn">Redo</button>
+    <button id="clearBtn">Clear</button>
+    <div id="exportContainer" style="position:relative;">
+      <button id="exportBtn">Export ▼</button>
+      <div id="exportMenu">
+        <button data-export="pdf">Export as PDF</button>
+        <button data-export="txt">Export as TXT</button>
+        <button data-export="html">Export as HTML</button>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main contenteditable="true" id="editor" spellcheck="true" aria-label="Text editor"></main>
+<main contenteditable="true" id="editor" spellcheck="true"></main>
 
-  <footer>© 2025 Abhi Type. All content saved locally.</footer>
+<footer>© 2025 Abhi Type. All content saved locally.</footer>
 
-  <!-- jsPDF CDN for PDF export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script>
-    const editor = document.getElementById('editor');
-    const toolbarButtons = document.querySelectorAll('#toolbar button[data-command]');
-    const undoBtn = document.getElementById('undoBtn');
-    const redoBtn = document.getElementById('redoBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const exportMenu = document.getElementById('exportMenu');
-    const textColorPicker = document.getElementById('textColorPicker');
+<script>
+const editor = document.getElementById('editor');
+const toolbarButtons = document.querySelectorAll('#toolbar button[data-command]');
+const undoBtn = document.getElementById('undoBtn');
+const redoBtn = document.getElementById('redoBtn');
+const clearBtn = document.getElementById('clearBtn');
+const exportBtn = document.getElementById('exportBtn');
+const exportMenu = document.getElementById('exportMenu');
+const textColorPicker = document.getElementById('textColorPicker');
 
-    // Store selection range globally
-    let savedSelection = null;
+let savedSelection = null;
 
-    // Save the selection range
-    function saveSelection() {
-      const sel = window.getSelection();
-      if (sel.rangeCount > 0) {
-        savedSelection = sel.getRangeAt(0);
-      }
+function saveSelection() {
+  const sel = window.getSelection();
+  if (sel.rangeCount > 0) savedSelection = sel.getRangeAt(0);
+}
+
+function restoreSelection() {
+  if (savedSelection) {
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedSelection);
+  }
+}
+
+function saveContent() {
+  localStorage.setItem('abhiTypeContent', editor.innerHTML);
+}
+
+function updateUndoRedo() {
+  undoBtn.disabled = false;
+  redoBtn.disabled = false;
+}
+
+function updateColorPicker() {
+  const sel = window.getSelection();
+  if (sel.rangeCount > 0) {
+    let node = sel.focusNode;
+    if (node.nodeType === 3) node = node.parentNode;
+    if (node && node.nodeType === 1) {
+      const color = window.getComputedStyle(node).color;
+      textColorPicker.value = rgbToHex(color);
+      return;
     }
+  }
+  textColorPicker.value = '#ffffff';
+}
 
-    // Restore the saved selection range
-    function restoreSelection() {
-      if (!savedSelection) return;
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(savedSelection);
-    }
+function rgbToHex(rgb) {
+  const result = rgb.match(/\d+/g);
+  if (!result) return '#ffffff';
+  return '#' + result.slice(0,3).map(x => {
+    const hex = parseInt(x).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  }).join('');
+}
 
-    // Load saved content on startup
-    window.addEventListener('load', () => {
-      const saved = localStorage.getItem('abhiTypeContent');
-      if (saved) {
-        editor.innerHTML = saved;
-      }
-      updateUndoRedo();
-    });
+function applyColor() {
+  restoreSelection();
+  document.execCommand('foreColor', false, textColorPicker.value);
+  saveContent();
+  editor.focus();
+  saveSelection();
+}
 
-    // Save content locally on input
-    editor.addEventListener('input', () => {
-      saveContent();
-      updateUndoRedo();
-    });
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('abhiTypeContent');
+  if (saved) editor.innerHTML = saved;
+  updateUndoRedo();
+  updateColorPicker();
+});
 
-    // Save selection on user actions inside editor
-    editor.addEventListener('keyup', saveSelection);
-    editor.addEventListener('mouseup', saveSelection);
-    editor.addEventListener('blur', saveSelection);
+editor.addEventListener('input', () => {
+  saveContent();
+  updateUndoRedo();
+});
 
-    // Also save selection just before color picker interaction so selection isn't lost
-    textColorPicker.addEventListener('mousedown', (e) => {
-      saveSelection();
-    });
+editor.addEventListener('mouseup', () => {
+  saveSelection();
+  updateColorPicker();
+});
+editor.addEventListener('keyup', () => {
+  saveSelection();
+  updateColorPicker();
+});
 
-    // Apply color on input and change events
-    function applyColor() {
-      restoreSelection();
-      document.execCommand('foreColor', false, textColorPicker.value);
-      saveContent();
-      editor.focus();
-      saveSelection(); // Save again so future changes also work smoothly
-    }
+textColorPicker.addEventListener('mousedown', saveSelection);
+textColorPicker.addEventListener('input', applyColor);
+textColorPicker.addEventListener('change', applyColor);
 
-    textColorPicker.addEventListener('input', applyColor);
-    textColorPicker.addEventListener('change', applyColor);
+toolbarButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const command = button.getAttribute('data-command');
+    document.execCommand(command, false, null);
+    editor.focus();
+    saveContent();
+    updateUndoRedo();
+  });
+});
 
-    // Toolbar commands
-    toolbarButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const command = button.getAttribute('data-command');
-        document.execCommand(command, false, null);
-        editor.focus();
+undoBtn.addEventListener('click', () => {
+  document.execCommand('undo');
+  saveContent();
+  updateUndoRedo();
+  editor.focus();
+});
+
+redoBtn.addEventListener('click', () => {
+  document.execCommand('redo');
+  saveContent();
+  updateUndoRedo();
+  editor.focus();
+});
+
+clearBtn.addEventListener('click', () => {
+  const text = editor.innerText;
+  editor.innerHTML = '';
+  editor.textContent = text;
+  saveContent();
+  updateUndoRedo();
+  editor.focus();
+});
+
+editor.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    switch (e.key.toLowerCase()) {
+      case 'b':
+      case 'i':
+      case 'u':
+        e.preventDefault();
+        document.execCommand(e.key.toLowerCase(), false, null);
         saveContent();
-        updateUndoRedo();
-      });
-    });
-
-    undoBtn.addEventListener('click', () => {
-      document.execCommand('undo');
-      saveContent();
-      updateUndoRedo();
-      editor.focus();
-    });
-
-    redoBtn.addEventListener('click', () => {
-      document.execCommand('redo');
-      saveContent();
-      updateUndoRedo();
-      editor.focus();
-    });
-
-    clearBtn.addEventListener('click', () => {
-      const text = editor.innerText;
-      editor.innerHTML = '';
-      editor.textContent = text;
-      saveContent();
-      updateUndoRedo();
-      editor.focus();
-    });
-
-    // Keyboard shortcuts for formatting (Ctrl + B, I, U, Z, Y)
-    editor.addEventListener('keydown', (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key.toLowerCase()) {
-          case 'b':
-          case 'i':
-          case 'u':
-            e.preventDefault();
-            document.execCommand(e.key.toLowerCase(), false, null);
-            saveContent();
-            break;
-          case 'z':
-            e.preventDefault();
-            document.execCommand('undo');
-            saveContent();
-            break;
-          case 'y':
-            e.preventDefault();
-            document.execCommand('redo');
-            saveContent();
-            break;
-        }
-      }
-    });
-
-    // List continuation on Enter key
-    editor.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        const range = selection.getRangeAt(0);
-        const container = range.startContainer;
-
-        // Check if inside a list item
-        const listItem = findClosestParent(container, 'LI');
-        if (listItem) {
-          // Check if the current LI is empty (no text or only <br>)
-          const liText = listItem.textContent.trim();
-          if (liText === '') {
-            // User pressed enter on empty list item — break the list
-            e.preventDefault();
-            // Insert a new paragraph after the list
-            const list = listItem.parentElement;
-            const p = document.createElement('p');
-            p.innerHTML = '<br>'; // keep cursor visible
-            list.parentNode.insertBefore(p, list.nextSibling);
-
-            // Remove the empty LI
-            listItem.remove();
-
-            // Set cursor in the new paragraph
-            placeCursorAtStart(p);
-            saveContent();
-            return;
-          }
-          // Otherwise, default behavior continues list — no special action needed here
-        }
-      }
-    });
-
-    // Helper: find closest parent node by tag name
-    function findClosestParent(node, tagName) {
-      while (node) {
-        if (node.nodeType === 1 && node.tagName === tagName) return node;
-        node = node.parentNode;
-      }
-      return null;
+        break;
+      case 'z':
+        e.preventDefault();
+        document.execCommand('undo');
+        saveContent();
+        break;
+      case 'y':
+        e.preventDefault();
+        document.execCommand('redo');
+        saveContent();
+        break;
     }
+  }
+});
 
-    // Helper: place cursor at start of element
-    function placeCursorAtStart(element) {
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.setStart(element, 0);
-      range.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range);
-      element.focus();
-    }
+// Export menu logic
+exportBtn.addEventListener('click', () => {
+  exportMenu.style.display = exportMenu.style.display === 'flex' ? 'none' : 'flex';
+});
 
-    // Save helper
-    function saveContent() {
-      localStorage.setItem('abhiTypeContent', editor.innerHTML);
-    }
+document.addEventListener('click', (e) => {
+  if (!exportBtn.contains(e.target) && !exportMenu.contains(e.target)) {
+    exportMenu.style.display = 'none';
+  }
+});
 
-    // Enable/disable undo/redo buttons if possible (simple implementation)
-    function updateUndoRedo() {
-      undoBtn.disabled = false;
-      redoBtn.disabled = false;
-    }
+exportMenu.querySelectorAll('button[data-export]').forEach(button => {
+  button.addEventListener('click', async () => {
+    const format = button.getAttribute('data-export');
+    if (format === 'txt') exportTxt();
+    else if (format === 'html') exportHtml();
+    else if (format === 'pdf') await exportPdf();
+    exportMenu.style.display = 'none';
+  });
+});
 
-    // Export menu toggle
-    exportBtn.addEventListener('click', () => {
-      const expanded = exportBtn.getAttribute('aria-expanded') === 'true';
-      if (expanded) {
-        closeExportMenu();
-      } else {
-        openExportMenu();
-      }
-    });
+function exportTxt() {
+  const text = editor.innerText;
+  const blob = new Blob([text], {type: 'text/plain'});
+  downloadBlob(blob, 'AbhiTypeDocument.txt');
+}
 
-    // Close menu if click outside
-    document.addEventListener('click', (e) => {
-      if (!exportBtn.contains(e.target) && !exportMenu.contains(e.target)) {
-        closeExportMenu();
-      }
-    });
-
-    // Export option click
-    exportMenu.querySelectorAll('button[data-export]').forEach(button => {
-      button.addEventListener('click', async () => {
-        const format = button.getAttribute('data-export');
-        if (format === 'txt') {
-          exportTxt();
-        } else if (format === 'html') {
-          exportHtml();
-        } else if (format === 'pdf') {
-          await exportPdf();
-        }
-        closeExportMenu();
-      });
-    });
-
-    function openExportMenu() {
-      exportMenu.style.display = 'flex';
-      exportBtn.setAttribute('aria-expanded', 'true');
-    }
-
-    function closeExportMenu() {
-      exportMenu.style.display = 'none';
-      exportBtn.setAttribute('aria-expanded', 'false');
-    }
-
-    // Export functions
-    function exportTxt() {
-      const text = editor.innerText;
-      const blob = new Blob([text], {type: 'text/plain'});
-      downloadBlob(blob, 'AbhiTypeDocument.txt');
-    }
-
-    function exportHtml() {
-      const content = editor.innerHTML;
-      const htmlDoc = `<!DOCTYPE html>
+function exportHtml() {
+  const content = editor.innerHTML;
+  const htmlDoc = `<!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Abhi Type Export</title>
-<style>
-  body {
-    font-family: 'Courier New', Courier, monospace;
-    background: white;
-    color: black;
-    margin: 2rem;
-    white-space: pre-wrap;
+<head><meta charset="UTF-8"><title>Abhi Type Export</title></head>
+<body style="font-family:'Courier New',monospace;">${content}</body></html>`;
+  const blob = new Blob([htmlDoc], {type: 'text/html'});
+  downloadBlob(blob, 'AbhiTypeDocument.html');
+}
+
+// PDF Export with Color
+async function exportPdf() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFont('Courier', 'normal');
+  doc.setFontSize(12);
+
+  let y = 10;
+
+  function processNode(node) {
+    if (node.nodeType === 3) {
+      const lines = doc.splitTextToSize(node.textContent, 180);
+      lines.forEach(line => {
+        doc.text(line, 10, y);
+        y += 7;
+      });
+    } else if (node.nodeType === 1) {
+      let color = window.getComputedStyle(node).color;
+      let rgb = color.match(/\d+/g);
+      if (rgb) {
+        doc.setTextColor(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
+      } else {
+        doc.setTextColor(0, 0, 0);
+      }
+      node.childNodes.forEach(processNode);
+    }
   }
-  ul, ol {
-    margin-left: 1.5rem;
-  }
-</style>
-</head>
-<body>
-${content}
-</body>
-</html>`;
 
-      const blob = new Blob([htmlDoc], {type: 'text/html'});
-      downloadBlob(blob, 'AbhiTypeDocument.html');
-    }
+  editor.childNodes.forEach(processNode);
+  doc.save('AbhiTypeDocument.pdf');
+}
 
-    async function exportPdf() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+function downloadBlob(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
 
-      doc.setFont('Courier', 'normal');
-      doc.setFontSize(12);
-
-      const text = editor.innerText;
-      const lines = doc.splitTextToSize(text, 180);
-
-      doc.text(lines, 10, 10);
-      doc.save('AbhiTypeDocument.pdf');
-    }
-
-    function downloadBlob(blob, filename) {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-  </script>
 </body>
 </html>
