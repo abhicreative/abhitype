@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Abhi Type</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.7.0/docx.umd.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --editor-bg: #1e1e1e;
+      --text-color: #f2f2f2;
+      --toolbar-bg: #1a1a1a;
+      --border: #333;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Fira Code', monospace;
+      overflow-x: hidden;
+    }
+    #toolbar {
+      background: var(--toolbar-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      flex-wrap: wrap;
+    }
+    .left-tools, .right-tools {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    input[type="number"], input[type="color"], button, select {
+      background: #2a2a2a;
+      color: var(--text-color);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    input[type="number"] {
+      width: 70px;
+    }
+    .zoom-buttons button {
+      font-weight: bold;
+      width: 32px;
+      height: 32px;
+    }
+    #editorWrapper {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+    .page {
+      width: 794px;
+      height: 1123px;
+      background: var(--editor-bg);
+      padding: 40px;
+      box-shadow: 0 0 10px #0008;
+      border-radius: 4px;
+      overflow: hidden;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #ffffff;
+      transform-origin: top center;
+    }
+    .page:focus {
+      outline: none;
+    }
+    #footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #aaa;
+      padding: 0.5rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: #181818;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    #counter {
+      cursor: pointer;
+    }
+    #fileInput {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <div class="left-tools">
+      <select onchange="execCmd(this.value)">
+        <option selected disabled>Text</option>
+        <option value="bold">Bold</option>
+        <option value="italic">Italic</option>
+        <option value="underline">Underline</option>
+      </select>
+      <select onchange="execCmd(this.value)">
+        <option selected disabled>Lists</option>
+        <option value="insertUnorderedList">• Bullet list</option>
+        <option value="insertOrderedList">1. Numbered list</option>
+      </select>
+      <select onchange="execCmd(this.value)">
+        <option selected disabled>Align</option>
+        <option value="justifyLeft">Left</option>
+        <option value="justifyCenter">Center</option>
+        <option value="justifyRight">Right</option>
+      </select>
+      <input type="number" id="fontSizeInput" min="8" max="60" step="2" value="16" title="Font size" />
+      <label style="font-size: 0.8rem;">Text</label>
+      <input type="color" id="colorPicker" title="Text color" value="#ffffff" />
+      <label style="font-size: 0.8rem;">Highlight</label>
+      <input type="color" id="highlightPicker" title="Highlight color" value="#000000" />
+      <button onclick="removeHighlight()">✖</button>
+    </div>
+    <div class="right-tools">
+      <div class="zoom-buttons">
+        <button onclick="adjustZoom(-0.1)">−</button>
+        <button onclick="adjustZoom(0.1)">+</button>
+      </div>
+      <div>
+        <button onclick="downloadDocx()">💾 DOCX</button>
+        <button onclick="exportPDF()">📄 PDF</button>
+        <button onclick="exportHTML()">🌐 HTML</button>
+        <button onclick="exportTXT()">📄 TXT</button>
+        <button onclick="document.getElementById('fileInput').click()">📥 Import</button>
+        <button onclick="clearAllPages()">🧹 Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="editorWrapper">
+    <div class="page" contenteditable="true" oninput="handleTyping(this)"></div>
+  </div>
+
+  <input type="file" id="fileInput" accept=".txt,.html" onchange="handleImport(event)">
+  <div id="footer">
+    <div id="counter" onclick="toggleCounter()">Words: 0</div>
+    <div><strong>Abhi Type</strong></div>
+  </div>
+
+  <script>
+    const wrapper = document.getElementById('editorWrapper');
+    const fontSizeInput = document.getElementById('fontSizeInput');
+    const colorPicker = document.getElementById('colorPicker');
+    const highlightPicker = document.getElementById('highlightPicker');
+    const counter = document.getElementById('counter');
+    let countMode = 'words';
+    let zoomLevel = 1;
+    let currentTextColor = '#ffffff';
+    let currentHighlightColor = 'transparent';
+
+    function execCmd(command, value = null) {
+      document.execCommand(command, false, value);
+      updateCounter();
+    }
+
+    function updateCounter() {
+      const text = [...document.querySelectorAll('.page')].map(p => p.innerText).join(" ");
+      const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+      counter.textContent = countMode === 'words' ? `Words: ${wordCount}` : `Chars: ${text.length}`;
+    }
+
+    function toggleCounter() {
+      countMode = countMode === 'words' ? 'chars' : 'words';
+      updateCounter();
+    }
+
+    function handleTyping(page) {
+      updateCounter();
+      const pages = document.querySelectorAll('.page');
+      const isLast = page === pages[pages.length - 1];
+      const contentNotEmpty = page.innerText.trim().length > 0;
+      if (isLast && contentNotEmpty && page.scrollHeight > page.clientHeight + 40) {
+        const newPage = createPage('');
+        wrapper.appendChild(newPage);
+        newPage.focus();
+      }
+      saveToLocalStorage();
+    }
+
+    function createPage(content = '') {
+      const page = document.createElement('div');
+      page.className = 'page';
+      page.contentEditable = true;
+      page.innerHTML = content;
+      page.setAttribute('oninput', 'handleTyping(this)');
+      return page;
+    }
+
+    function adjustZoom(change) {
+      zoomLevel = Math.min(2, Math.max(0.5, zoomLevel + change));
+      document.querySelectorAll('.page').forEach(page => {
+        page.style.transform = `scale(${zoomLevel})`;
+      });
+    }
+
+    fontSizeInput.addEventListener('input', () => {
+      const size = Math.max(8, Math.min(60, parseInt(fontSizeInput.value)));
+      document.querySelectorAll('.page').forEach(p => p.style.fontSize = size + 'px');
+    });
+
+    colorPicker.addEventListener('input', () => {
+      currentTextColor = colorPicker.value;
+      execCmd('foreColor', currentTextColor);
+    });
+
+    highlightPicker.addEventListener('input', () => {
+      currentHighlightColor = highlightPicker.value;
+      execCmd('hiliteColor', currentHighlightColor);
+    });
+
+    function removeHighlight() {
+      currentHighlightColor = 'transparent';
+      execCmd('hiliteColor', 'transparent');
+    }
+
+    document.addEventListener('selectionchange', () => {
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('foreColor', false, currentTextColor);
+      document.execCommand('hiliteColor', false, currentHighlightColor);
+    });
+
+    function saveToLocalStorage() {
+      const data = [...document.querySelectorAll('.page')].map(p => p.innerHTML);
+      localStorage.setItem('abhiTypeDocPages', JSON.stringify(data));
+    }
+
+    function clearAllPages() {
+      if (confirm("Are you sure you want to clear the document?")) {
+        wrapper.innerHTML = '';
+        wrapper.appendChild(createPage());
+        localStorage.removeItem('abhiTypeDocPages');
+        updateCounter();
+      }
+    }
+
+    async function downloadDocx() {
+      const { Document, Packer, Paragraph } = window.docx;
+      const doc = new Document();
+      const children = [];
+
+      document.querySelectorAll('.page').forEach(page => {
+        page.innerText.split('\\n').forEach(line => {
+          children.push(new Paragraph(line));
+        });
+        children.push(new Paragraph('')); // page break
+      });
+
+      doc.addSection({ children });
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, 'AbhiType.docx');
+      localStorage.removeItem('abhiTypeDocPages');
+    }
+
+    function exportPDF() {
+      html2pdf().from(wrapper).set({
+        margin: 10,
+        filename: 'AbhiType.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).save();
+      localStorage.removeItem('abhiTypeDocPages');
+    }
+
+    function exportHTML() {
+      const pages = document.querySelectorAll('.page');
+      const content = [...pages].map(p => p.innerHTML).join('<hr>');
+      const blob = new Blob([`<html><body>${content}</body></html>`], { type: 'text/html' });
+      saveAs(blob, 'AbhiType.html');
+      localStorage.removeItem('abhiTypeDocPages');
+    }
+
+    function exportTXT() {
+      const text = [...document.querySelectorAll('.page')].map(p => p.innerText).join('\\n\\n');
+      const blob = new Blob([text], { type: 'text/plain' });
+      saveAs(blob, 'AbhiType.txt');
+      localStorage.removeItem('abhiTypeDocPages');
+    }
+
+    function handleImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        wrapper.innerHTML = '';
+        wrapper.appendChild(createPage(e.target.result));
+        saveToLocalStorage();
+        updateCounter();
+      };
+      reader.readAsText(file);
+    }
+
+    window.onload = () => {
+      const saved = localStorage.getItem('abhiTypeDocPages');
+      wrapper.innerHTML = '';
+      if (saved) {
+        JSON.parse(saved).forEach(content => wrapper.appendChild(createPage(content)));
+      } else {
+        wrapper.appendChild(createPage());
+      }
+      updateCounter();
+    };
+  </script>
+</body>
+</html>
