@@ -2,981 +2,503 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Abhi Type</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap"
-    rel="stylesheet"
-  />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <title>Abhi Type</title>
   <style>
-    :root {
-      --bg-color: #121212;
-      --editor-bg: #1e1e1e;
-      --text-color: #f2f2f2;
-      --toolbar-bg: #1a1a1a;
-      --border: #333;
-      --dropdown-bg: #2a2a2a;
-      --dropdown-hover-bg: #3a3a3a;
-      --dropdown-border: #444;
-      --medium-grey: #666666;
-    }
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Fira Code', monospace;
-      overflow-x: hidden;
-    }
-    #toolbar {
-      background: var(--toolbar-bg);
-      border-bottom: 1px solid var(--border);
-      padding: 0.6rem 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      flex-wrap: wrap;
-    }
-    .left-tools {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      position: relative;
-    }
-    .right-tools {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    input[type='number'],
-    input[type='color'],
-    button {
-      background: #2a2a2a;
-      color: var(--text-color);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-family: inherit;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    input[type='number'] {
-      width: 70px;
-    }
-    .zoom-buttons button {
-      font-weight: bold;
-      width: 32px;
-      height: 32px;
-    }
-    #editorWrapper {
-      padding: 2rem;
+    body, html {
+      margin: 0; 
+      padding: 0; 
+      height: 100%;
+      background: #121212;
+      color: #eee;
+      font-family: 'Courier New', Courier, monospace;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-    }
-    .page {
-      width: 794px;
-      height: 1123px;
-      background: var(--editor-bg);
-      padding: 40px;
-      box-shadow: 0 0 10px #0008;
-      border-radius: 4px;
-      overflow: hidden;
-      font-size: 16px;
-      line-height: 1.6;
-      color: #ffffff;
-      outline: none;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      min-height: 100%;
       user-select: text;
     }
-    .page:focus {
-      outline: none;
-    }
-    #footer {
+
+    header {
+      background: #1f1f1f;
+      padding: 10px 20px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      font-size: 0.85rem;
-      color: #aaa;
-      padding: 0.5rem 1.5rem;
-      border-top: 1px solid var(--border);
-      background: #181818;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      z-index: 20;
-    }
-    #counter {
-      cursor: pointer;
+      border-bottom: 1px solid #333;
+      font-family: 'Courier New', Courier, monospace;
       position: relative;
-      z-index: 21;
+      z-index: 10;
     }
 
-    /* Custom dropdown styles */
-    .custom-dropdown {
-      position: relative;
+    header h1 {
+      margin: 0;
+      font-weight: normal;
+      font-size: 1.5rem;
+      color: #ddd;
       user-select: none;
-      cursor: pointer;
-      background: var(--dropdown-bg);
-      border: 1px solid var(--dropdown-border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      color: var(--text-color);
-      font-family: inherit;
-      font-size: 0.9rem;
-      min-width: 110px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .custom-dropdown:hover {
-      background: var(--dropdown-hover-bg);
-    }
-    .custom-dropdown .selected {
-      pointer-events: none;
-    }
-    .custom-dropdown .arrow {
-      border: solid var(--text-color);
-      border-width: 0 2px 2px 0;
-      display: inline-block;
-      padding: 3px;
-      margin-left: 8px;
-      transform: rotate(45deg);
-      -webkit-transform: rotate(45deg);
-    }
-    .dropdown-list {
-      position: absolute;
-      bottom: 100%;
-      left: 0;
-      right: 0;
-      background: var(--dropdown-bg);
-      border: 1px solid var(--dropdown-border);
-      border-bottom: none;
-      border-radius: 6px 6px 0 0;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 100;
-      display: none;
-      flex-direction: column;
-      margin-bottom: 6px;
-    }
-    .dropdown-list.open {
-      display: flex;
-    }
-    .dropdown-list div {
-      padding: 6px 10px;
-      cursor: pointer;
-      color: var(--medium-grey);
-    }
-    .dropdown-list div:hover {
-      background: var(--dropdown-hover-bg);
-      color: var(--text-color);
+      flex-grow: 1;
     }
 
-    /* Popup overlay */
-    #pagePopupOverlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      justify-content: center;
+    #toolbar {
+      display: flex;
+      gap: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      position: relative;
       align-items: center;
-      z-index: 9999;
     }
-    #pagePopup {
-      background: var(--editor-bg);
-      padding: 20px 30px;
-      border-radius: 10px;
-      color: var(--text-color);
-      box-shadow: 0 0 15px #000;
-      text-align: center;
-      max-width: 320px;
-      font-size: 1.2rem;
-      font-family: 'Fira Code', monospace;
-    }
-    #pagePopup button {
-      margin: 15px 10px 0 10px;
-      padding: 8px 18px;
-      font-size: 1rem;
+
+    button {
+      background: #2a2a2a;
       border: none;
-      border-radius: 6px;
+      color: #ccc;
+      font-size: 1rem;
+      padding: 6px 10px;
+      border-radius: 4px;
       cursor: pointer;
-      background: #3a3a3a;
-      color: var(--text-color);
       transition: background 0.2s ease;
+      user-select: none;
+      font-family: 'Courier New', Courier, monospace;
     }
-    #pagePopup button:hover {
+
+    button:hover {
+      background: #444;
+      color: white;
+    }
+
+    button:active {
       background: #555;
     }
 
-    /* Floating remove page container */
-    #removePageContainer {
-      position: fixed;
-      bottom: 35px;
-      left: 15px;
-      background: var(--editor-bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
+    #exportBtn {
+      position: relative;
+      user-select: none;
       display: flex;
       align-items: center;
       gap: 6px;
-      z-index: 30;
-      color: var(--text-color);
-      user-select: none;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.9rem;
-      min-width: 220px;
+      font-weight: normal;
     }
-    #removePageDropdown {
-      flex-grow: 1;
-      position: relative;
-      user-select: none;
-      z-index: 1000; /* make sure dropdown appears above buttons */
-    }
-    #removePageDropdown .selected {
-      background: var(--dropdown-bg);
-      border: 1px solid var(--dropdown-border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      color: var(--medium-grey);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      z-index: 1001;
-    }
-    #removePageDropdown .selected:hover {
-      background: var(--dropdown-hover-bg);
-      color: var(--text-color);
-    }
-    #removePageDropdown .arrow {
-      border: solid var(--medium-grey);
-      border-width: 0 2px 2px 0;
-      display: inline-block;
-      padding: 3px;
-      margin-left: 8px;
-      transform: rotate(45deg);
-      -webkit-transform: rotate(45deg);
-      transition: border-color 0.2s ease;
-    }
-    #removePageDropdown.open .arrow {
-      transform: rotate(-135deg);
-      border-color: var(--text-color);
-    }
-    #removePageDropdown.open .selected {
-      background: var(--dropdown-hover-bg);
-      color: var(--text-color);
-    }
-    #removePageDropdown .dropdown-list {
+
+    #exportMenu {
       position: absolute;
-      bottom: 100%; /* open above */
-      left: 0;
+      top: 38px;
       right: 0;
-      background: var(--dropdown-bg);
-      border: 1px solid var(--dropdown-border);
-      border-bottom: none;
-      border-radius: 6px 6px 0 0;
-      max-height: 200px;
-      overflow-y: auto;
+      background: #2a2a2a;
+      border-radius: 4px;
+      border: 1px solid #444;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.5);
       display: none;
       flex-direction: column;
-      margin-bottom: 6px;
-      z-index: 1002;
+      min-width: 120px;
+      font-family: 'Courier New', Courier, monospace;
+      z-index: 100;
     }
-    #removePageDropdown.open .dropdown-list {
-      display: flex;
-    }
-    #removePageDropdown .dropdown-list div {
-      padding: 6px 10px;
-      cursor: pointer;
-      color: var(--medium-grey);
-    }
-    #removePageDropdown .dropdown-list div:hover {
-      background: var(--dropdown-hover-bg);
-      color: var(--text-color);
-    }
-    #removePageBtn {
-      background: #c0392b;
+
+    #exportMenu button {
+      background: transparent;
       border: none;
-      border-radius: 4px;
-      padding: 6px 12px;
-      color: white;
-      font-weight: bold;
+      color: #ccc;
+      padding: 8px 12px;
+      text-align: left;
       cursor: pointer;
-      transition: background 0.2s ease;
+      border-radius: 0;
+    }
+    #exportMenu button:hover {
+      background: #444;
+      color: white;
+    }
+
+    #editor {
+      flex-grow: 1;
+      margin: 0;
+      padding: 20px;
+      background: #181818;
+      color: #eee;
+      outline: none;
+      border: none;
+      overflow-y: auto;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      -webkit-font-smoothing: antialiased;
+      tab-size: 4;
+      min-height: 300px;
+    }
+
+    #editor:empty::before {
+      content: "Start typing...";
+      color: #666;
+      pointer-events: none;
       user-select: none;
     }
-    #removePageBtn:hover {
-      background: #e74c3c;
-    }
-    #addPageBtn {
-      background: #2980b9;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 12px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s ease;
+
+    footer {
+      background: #1f1f1f;
+      padding: 10px 20px;
+      color: #777;
+      font-size: 0.9rem;
+      text-align: center;
+      border-top: 1px solid #333;
       user-select: none;
+      font-family: 'Courier New', Courier, monospace;
     }
-    #addPageBtn:hover {
-      background: #3498db;
+
+    /* Style the color input to fit the toolbar */
+    #textColorPicker {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+
+    #textColorPicker::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    #textColorPicker::-webkit-color-swatch {
+      border-radius: 4px;
+    }
+
+    @media (max-width: 600px) {
+      #toolbar {
+        flex-wrap: wrap;
+      }
+      button, #exportBtn {
+        flex: 1 1 30%;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="toolbar">
-    <div class="left-tools">
-      <!-- Custom Dropdown: Text -->
-      <div class="custom-dropdown" id="dropdownText" tabindex="0">
-        <span class="selected">Text</span>
-        <i class="arrow"></i>
-        <div class="dropdown-list" aria-label="Text formatting options">
-          <div data-cmd="bold">Bold</div>
-          <div data-cmd="italic">Italic</div>
-          <div data-cmd="underline">Underline</div>
+
+  <header>
+    <h1>Abhi Type</h1>
+    <div id="toolbar" role="toolbar" aria-label="Text formatting toolbar">
+      <button type="button" title="Bold (Ctrl+B)" data-command="bold" aria-label="Bold"><b>B</b></button>
+      <button type="button" title="Italic (Ctrl+I)" data-command="italic" aria-label="Italic"><i>I</i></button>
+      <button type="button" title="Underline (Ctrl+U)" data-command="underline" aria-label="Underline"><u>U</u></button>
+
+      <!-- Text color picker -->
+      <input type="color" id="textColorPicker" title="Text Color" aria-label="Text color picker" />
+
+      <button type="button" title="Bullet List" data-command="insertUnorderedList" aria-label="Bullet List">• List</button>
+      <button type="button" title="Numbered List" data-command="insertOrderedList" aria-label="Numbered List">1. List</button>
+      <button type="button" title="Undo (Ctrl+Z)" id="undoBtn" aria-label="Undo">Undo</button>
+      <button type="button" title="Redo (Ctrl+Y)" id="redoBtn" aria-label="Redo">Redo</button>
+      <button type="button" title="Clear Formatting" id="clearBtn" aria-label="Clear formatting">Clear</button>
+
+      <div id="exportContainer" style="position:relative;">
+        <button id="exportBtn" aria-haspopup="true" aria-expanded="false" aria-controls="exportMenu" title="Export document">
+          Export ▼
+        </button>
+        <div id="exportMenu" role="menu" aria-label="Export options">
+          <button role="menuitem" data-export="pdf">Export as PDF</button>
+          <button role="menuitem" data-export="txt">Export as TXT</button>
+          <button role="menuitem" data-export="html">Export as HTML</button>
         </div>
       </div>
-
-      <!-- Custom Dropdown: Lists -->
-      <div class="custom-dropdown" id="dropdownList" tabindex="0">
-        <span class="selected">Lists</span>
-        <i class="arrow"></i>
-        <div class="dropdown-list" aria-label="List options">
-          <div data-cmd="insertUnorderedList">• Bullet list</div>
-          <div data-cmd="insertOrderedList">1. Numbered list</div>
-        </div>
-      </div>
-
-      <!-- Custom Dropdown: Align -->
-      <div class="custom-dropdown" id="dropdownAlign" tabindex="0">
-        <span class="selected">Align</span>
-        <i class="arrow"></i>
-        <div class="dropdown-list" aria-label="Text alignment options">
-          <div data-cmd="justifyLeft">Left</div>
-          <div data-cmd="justifyCenter">Center</div>
-          <div data-cmd="justifyRight">Right</div>
-        </div>
-      </div>
-
-      <input
-        type="number"
-        id="fontSizeInput"
-        min="8"
-        max="60"
-        step="2"
-        value="16"
-        title="Font size"
-      />
-      <label style="font-size: 0.8rem;">Text</label>
-      <input type="color" id="colorPicker" title="Text color" value="#ffffff" />
-      <label style="font-size: 0.8rem;">Highlight</label>
-      <input type="color" id="highlightPicker" title="Highlight color" value="#000000" />
-      <button onclick="removeHighlight()">✖</button>
     </div>
-    <div class="right-tools">
-      <div class="zoom-buttons">
-        <button onclick="adjustZoom(-0.1)">−</button>
-        <button onclick="adjustZoom(0.1)">+</button>
-      </div>
-      <div>
-        <button onclick="exportPDF()">📄 PDF</button>
-        <button onclick="exportHTML()">🌐 HTML</button>
-        <button onclick="exportTXT()">📄 TXT</button>
-        <button onclick="document.getElementById('fileInput').click()">📥 Import</button>
-        <button onclick="clearAllPages()">🧹 Clear</button>
-      </div>
-    </div>
-  </div>
+  </header>
 
-  <div id="editorWrapper">
-    <!-- Pages go here -->
-  </div>
+  <main contenteditable="true" id="editor" spellcheck="true" aria-label="Text editor"></main>
 
-  <input type="file" id="fileInput" accept=".txt,.html" onchange="handleImport(event)" style="display:none" />
+  <footer>© 2025 Abhi Type. All content saved locally.</footer>
 
-  <div id="footer">
-    <div id="counter" onclick="toggleCounter()">Words: 0</div>
-    <div><strong>Abhi Type</strong></div>
-  </div>
-
-  <!-- Popup for new page creation -->
-  <div
-    id="pagePopupOverlay"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="pagePopupMessage"
-    tabindex="-1"
-  >
-    <div id="pagePopup">
-      <div id="pagePopupMessage">Would you like to create another page?</div>
-      <button id="popupYesBtn">Yes</button>
-      <button id="popupNoBtn">No</button>
-    </div>
-  </div>
-
-  <!-- Floating Remove Page Container -->
-  <div id="removePageContainer" aria-label="Page controls">
-    <div id="removePageDropdown" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Select page to remove">
-      <div class="selected" aria-live="polite" aria-atomic="true" data-selected-index="0">
-        Page 1
-        <i class="arrow"></i>
-      </div>
-      <div class="dropdown-list" role="listbox" tabindex="-1" aria-label="Page list"></div>
-    </div>
-    <button id="removePageBtn" aria-label="Remove selected page">Remove</button>
-    <button id="addPageBtn" aria-label="Add new page">Add Page</button>
-  </div>
+  <!-- jsPDF CDN for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
-    const fontSizeInput = document.getElementById('fontSizeInput');
-    const colorPicker = document.getElementById('colorPicker');
-    const highlightPicker = document.getElementById('highlightPicker');
-    const counter = document.getElementById('counter');
-    const wrapper = document.getElementById('editorWrapper');
-    const pagePopupOverlay = document.getElementById('pagePopupOverlay');
-    const popupYesBtn = document.getElementById('popupYesBtn');
-    const popupNoBtn = document.getElementById('popupNoBtn');
-    const removePageDropdown = document.getElementById('removePageDropdown');
-    const removePageBtn = document.getElementById('removePageBtn');
-    const addPageBtn = document.getElementById('addPageBtn');
-    const removePageSelected = removePageDropdown.querySelector('.selected');
-    const dropdownList = removePageDropdown.querySelector('.dropdown-list');
+    const editor = document.getElementById('editor');
+    const toolbarButtons = document.querySelectorAll('#toolbar button[data-command]');
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const exportMenu = document.getElementById('exportMenu');
+    const textColorPicker = document.getElementById('textColorPicker');
 
-    let countMode = 'words';
-    let zoomLevel = 1;
-    let currentTextColor = '#ffffff';
-    let currentHighlightColor = 'transparent';
-    let popupActive = false;
+    // Store selection range globally
+    let savedSelection = null;
 
-    // Pending styles for next typed text
-    let pendingFontSize = null;
-    let pendingTextColor = null;
-    let pendingHighlightColor = null;
-
-    // Custom dropdown elements (toolbar ones)
-    const dropdowns = [
-      { container: document.getElementById('dropdownText') },
-      { container: document.getElementById('dropdownList') },
-      { container: document.getElementById('dropdownAlign') }
-    ];
-
-    // Initialize toolbar dropdowns
-    dropdowns.forEach(({ container }) => {
-      const selected = container.querySelector('.selected');
-      const list = container.querySelector('.dropdown-list');
-
-      container.addEventListener('click', () => {
-        if (popupActive) return;
-        closeAllDropdowns(container);
-        list.classList.toggle('open');
-      });
-
-      list.querySelectorAll('div').forEach(option => {
-        option.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (popupActive) return;
-          const cmd = option.getAttribute('data-cmd');
-          execCmd(cmd);
-          selected.textContent = option.textContent;
-          list.classList.remove('open');
-        });
-      });
-
-      container.addEventListener('keydown', e => {
-        if (popupActive) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          container.click();
-        } else if (e.key === 'Escape') {
-          list.classList.remove('open');
-        }
-      });
-    });
-
-    function closeAllDropdowns(except = null) {
-      dropdowns.forEach(({ container }) => {
-        if (container !== except) {
-          container.querySelector('.dropdown-list').classList.remove('open');
-        }
-      });
-      // Also close removePageDropdown if except is not it
-      if (except !== removePageDropdown) {
-        removePageDropdown.classList.remove('open');
-        removePageDropdown.setAttribute('aria-expanded', 'false');
+    // Save the selection range
+    function saveSelection() {
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        savedSelection = sel.getRangeAt(0);
       }
     }
 
-    // Font size input
-    fontSizeInput.addEventListener('change', () => {
-      let val = parseInt(fontSizeInput.value);
-      if (val < 8) val = 8;
-      if (val > 60) val = 60;
-      pendingFontSize = val;
-      execCmd('fontSize', '7'); // font size 7 is max, we override with style below
-      const fonts = document.getElementsByTagName('font');
-      for (const fontElem of fonts) {
-        if (fontElem.size === '7') {
-          fontElem.removeAttribute('size');
-          fontElem.style.fontSize = val + 'px';
-        }
-      }
-      pendingFontSize = null;
-      saveToLocalStorage();
-    });
-
-    // Color pickers
-    colorPicker.addEventListener('change', () => {
-      pendingTextColor = colorPicker.value;
-      execCmd('foreColor', pendingTextColor);
-      pendingTextColor = null;
-      currentTextColor = colorPicker.value;
-      saveToLocalStorage();
-    });
-
-    highlightPicker.addEventListener('change', () => {
-      pendingHighlightColor = highlightPicker.value;
-      execCmd('hiliteColor', pendingHighlightColor);
-      pendingHighlightColor = null;
-      currentHighlightColor = highlightPicker.value;
-      saveToLocalStorage();
-    });
-
-    // Remove highlight button
-    function removeHighlight() {
-      execCmd('hiliteColor', 'transparent');
-      pendingHighlightColor = 'transparent';
-      highlightPicker.value = '#000000';
-      currentHighlightColor = 'transparent';
-      saveToLocalStorage();
-    }
-    window.removeHighlight = removeHighlight;
-
-    // Zoom
-    function adjustZoom(amount) {
-      zoomLevel += amount;
-      if (zoomLevel < 0.3) zoomLevel = 0.3;
-      if (zoomLevel > 3) zoomLevel = 3;
-      [...document.querySelectorAll('.page')].forEach(page => {
-        page.style.transform = `scale(${zoomLevel})`;
-        page.style.transformOrigin = 'center center';
-      });
-    }
-    window.adjustZoom = adjustZoom;
-
-    // Save to local storage
-    function saveToLocalStorage() {
-      const data = [...document.querySelectorAll('.page')].map(p => p.innerHTML);
-      localStorage.setItem('abhiTypeDocPages', JSON.stringify(data));
+    // Restore the saved selection range
+    function restoreSelection() {
+      if (!savedSelection) return;
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(savedSelection);
     }
 
-    // Load from local storage or create new page
-    window.onload = () => {
-      const saved = localStorage.getItem('abhiTypeDocPages');
-      wrapper.innerHTML = '';
+    // Load saved content on startup
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('abhiTypeContent');
       if (saved) {
-        JSON.parse(saved).forEach(content => {
-          const page = document.createElement('div');
-          page.className = 'page';
-          page.contentEditable = true;
-          page.innerHTML = content;
-          attachPageEvents(page);
-          wrapper.appendChild(page);
-        });
+        editor.innerHTML = saved;
       }
-      if (wrapper.children.length === 0) {
-        addNewPage();
-      }
-      updateRemovePageDropdown();
-      updateCounter();
-    };
-
-    // Add new page function
-    function addNewPage() {
-      const newPage = document.createElement('div');
-      newPage.className = 'page';
-      newPage.contentEditable = true;
-      newPage.style.fontSize = fontSizeInput.value + 'px';
-      attachPageEvents(newPage);
-      wrapper.appendChild(newPage);
-      newPage.focus();
-      updateRemovePageDropdown();
-      updateCounter();
-      saveToLocalStorage();
-    }
-
-    // Attach events to a page
-    function attachPageEvents(page) {
-      page.setAttribute('oninput', 'handleTyping(this)');
-      page.setAttribute('onkeydown', 'handleKeyDown(event, this)');
-      page.addEventListener('paste', (e) => {
-        // Optional: clean paste here
-        e.preventDefault();
-        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-        document.execCommand('insertText', false, text);
-      });
-    }
-
-    // Remove page dropdown toggle
-    removePageDropdown.querySelector('.selected').addEventListener('click', () => {
-      if (popupActive) return;
-      const isOpen = removePageDropdown.classList.toggle('open');
-      removePageDropdown.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      updateUndoRedo();
     });
 
-    // Update remove page dropdown list dynamically
-    function updateRemovePageDropdown() {
-      dropdownList.innerHTML = '';
-      const pages = [...document.querySelectorAll('.page')];
-      pages.forEach((page, i) => {
-        const div = document.createElement('div');
-        div.textContent = `Page ${i + 1}`;
-        div.style.color = 'var(--medium-grey)';
-        div.setAttribute('role', 'option');
-        div.setAttribute('tabindex', '0');
-        div.addEventListener('click', () => {
-          removePageSelected.textContent = div.textContent;
-          removePageDropdown.classList.remove('open');
-          removePageDropdown.setAttribute('aria-expanded', 'false');
-          removePageSelected.appendChild(createArrowIcon());
-          removePageSelected.setAttribute('data-selected-index', i);
-        });
-        div.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+    // Save content locally on input
+    editor.addEventListener('input', () => {
+      saveContent();
+      updateUndoRedo();
+    });
+
+    // Save selection on user actions inside editor
+    editor.addEventListener('keyup', saveSelection);
+    editor.addEventListener('mouseup', saveSelection);
+    editor.addEventListener('blur', saveSelection);
+
+    // Also save selection just before color picker interaction so selection isn't lost
+    textColorPicker.addEventListener('mousedown', (e) => {
+      saveSelection();
+    });
+
+    // Apply color on input and change events
+    function applyColor() {
+      restoreSelection();
+      document.execCommand('foreColor', false, textColorPicker.value);
+      saveContent();
+      editor.focus();
+      saveSelection(); // Save again so future changes also work smoothly
+    }
+
+    textColorPicker.addEventListener('input', applyColor);
+    textColorPicker.addEventListener('change', applyColor);
+
+    // Toolbar commands
+    toolbarButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const command = button.getAttribute('data-command');
+        document.execCommand(command, false, null);
+        editor.focus();
+        saveContent();
+        updateUndoRedo();
+      });
+    });
+
+    undoBtn.addEventListener('click', () => {
+      document.execCommand('undo');
+      saveContent();
+      updateUndoRedo();
+      editor.focus();
+    });
+
+    redoBtn.addEventListener('click', () => {
+      document.execCommand('redo');
+      saveContent();
+      updateUndoRedo();
+      editor.focus();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      const text = editor.innerText;
+      editor.innerHTML = '';
+      editor.textContent = text;
+      saveContent();
+      updateUndoRedo();
+      editor.focus();
+    });
+
+    // Keyboard shortcuts for formatting (Ctrl + B, I, U, Z, Y)
+    editor.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+          case 'i':
+          case 'u':
             e.preventDefault();
-            div.click();
-          }
-        });
-        dropdownList.appendChild(div);
-      });
-      // Select last page by default
-      if (pages.length > 0) {
-        removePageSelected.textContent = `Page ${pages.length}`;
-        removePageSelected.setAttribute('data-selected-index', pages.length - 1);
-        removePageSelected.appendChild(createArrowIcon());
-      }
-    }
-
-    function createArrowIcon() {
-      const arrow = document.createElement('i');
-      arrow.className = 'arrow';
-      return arrow;
-    }
-
-    // Remove page button handler
-    removePageBtn.addEventListener('click', () => {
-      if (popupActive) return;
-      const selectedIndex = parseInt(removePageSelected.getAttribute('data-selected-index'), 10);
-      const pages = document.querySelectorAll('.page');
-      if (pages.length <= 1) {
-        alert('Cannot remove the last page.');
-        return;
-      }
-      if (selectedIndex >= 0 && selectedIndex < pages.length) {
-        pages[selectedIndex].remove();
-        updateRemovePageDropdown();
-        updateCounter();
-        saveToLocalStorage();
-        // Focus previous or first page
-        const newPages = document.querySelectorAll('.page');
-        let focusIndex = selectedIndex - 1;
-        if (focusIndex < 0) focusIndex = 0;
-        if (newPages.length > 0) newPages[focusIndex].focus();
-      }
-    });
-
-    // Add page button handler
-    addPageBtn.addEventListener('click', () => {
-      if (popupActive) return;
-      addNewPage();
-    });
-
-    // Show popup and block input
-    function showPopup() {
-      popupActive = true;
-      pagePopupOverlay.style.display = 'flex';
-      pagePopupOverlay.focus();
-    }
-    function hidePopup() {
-      popupActive = false;
-      pagePopupOverlay.style.display = 'none';
-    }
-
-    popupYesBtn.addEventListener('click', () => {
-      addNewPage();
-      hidePopup();
-    });
-    popupNoBtn.addEventListener('click', () => {
-      hidePopup();
-    });
-
-    // Handle typing event on a page
-    window.handleTyping = function (page) {
-      updateCounter();
-      applyPendingStylesToSelectionOrNextTyped();
-
-      // If page content overflows its height, show popup only if last page
-      if (page.scrollHeight > page.clientHeight) {
-        const pages = document.querySelectorAll('.page');
-        if (page === pages[pages.length - 1] && !popupActive) {
-          showPopup();
+            document.execCommand(e.key.toLowerCase(), false, null);
+            saveContent();
+            break;
+          case 'z':
+            e.preventDefault();
+            document.execCommand('undo');
+            saveContent();
+            break;
+          case 'y':
+            e.preventDefault();
+            document.execCommand('redo');
+            saveContent();
+            break;
         }
       }
-      saveToLocalStorage();
-    };
+    });
 
-    // Handle keydown event on page: for Enter and Backspace list logic
-    window.handleKeyDown = function (event, page) {
-      if (popupActive) {
-        event.preventDefault();
-        return; // block typing while popup active
-      }
-      if (event.key === 'Enter') {
-        // Handle auto continuation of lists
+    // List continuation on Enter key
+    editor.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
-
         const range = selection.getRangeAt(0);
-        let container = range.startContainer;
+        const container = range.startContainer;
 
-        // Find the closest LI or contenteditable DIV parent
-        while (container && container !== page && container.nodeName !== 'LI' && container.nodeName !== 'DIV') {
-          container = container.parentNode;
-        }
-
-        // If inside a list item (LI), handle continuation
-        if (container && container.nodeName === 'LI') {
-          event.preventDefault();
-
-          const liText = container.textContent.trim();
-
-          // If current li is empty, remove the list (exit list)
+        // Check if inside a list item
+        const listItem = findClosestParent(container, 'LI');
+        if (listItem) {
+          // Check if the current LI is empty (no text or only <br>)
+          const liText = listItem.textContent.trim();
           if (liText === '') {
-            document.execCommand('outdent'); // outdent to remove list formatting
+            // User pressed enter on empty list item — break the list
+            e.preventDefault();
+            // Insert a new paragraph after the list
+            const list = listItem.parentElement;
+            const p = document.createElement('p');
+            p.innerHTML = '<br>'; // keep cursor visible
+            list.parentNode.insertBefore(p, list.nextSibling);
+
+            // Remove the empty LI
+            listItem.remove();
+
+            // Set cursor in the new paragraph
+            placeCursorAtStart(p);
+            saveContent();
             return;
           }
-
-          // Insert new list item
-          document.execCommand('insertHTML', false, '<li><br></li>');
-          return;
-        }
-
-        // If inside contenteditable but not in LI, fallback normal enter
-      }
-
-      if (event.key === 'Backspace') {
-        // Remove list formatting if current line is empty list item
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-
-        const range = selection.getRangeAt(0);
-        let container = range.startContainer;
-
-        // Find closest LI or contenteditable DIV parent
-        while (container && container !== page && container.nodeName !== 'LI' && container.nodeName !== 'DIV') {
-          container = container.parentNode;
-        }
-
-        if (container && container.nodeName === 'LI') {
-          const liText = container.textContent.trim();
-          if (liText === '') {
-            event.preventDefault();
-            document.execCommand('outdent'); // remove list formatting (outdent)
-          }
+          // Otherwise, default behavior continues list — no special action needed here
         }
       }
-    };
+    });
 
-    // Exec command helper
-    function execCmd(command, value = null) {
-      document.execCommand(command, false, value);
-      updateCounter();
-      saveToLocalStorage();
+    // Helper: find closest parent node by tag name
+    function findClosestParent(node, tagName) {
+      while (node) {
+        if (node.nodeType === 1 && node.tagName === tagName) return node;
+        node = node.parentNode;
+      }
+      return null;
     }
 
-    // Update word or char count
-    function updateCounter() {
-      const pages = [...document.querySelectorAll('.page')];
-      let text = pages.map(p => p.innerText).join(' ');
-      let count;
-      if (countMode === 'words') {
-        count = text.trim().split(/\s+/).filter(Boolean).length;
-        counter.textContent = `Words: ${count}`;
+    // Helper: place cursor at start of element
+    function placeCursorAtStart(element) {
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.setStart(element, 0);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      element.focus();
+    }
+
+    // Save helper
+    function saveContent() {
+      localStorage.setItem('abhiTypeContent', editor.innerHTML);
+    }
+
+    // Enable/disable undo/redo buttons if possible (simple implementation)
+    function updateUndoRedo() {
+      undoBtn.disabled = false;
+      redoBtn.disabled = false;
+    }
+
+    // Export menu toggle
+    exportBtn.addEventListener('click', () => {
+      const expanded = exportBtn.getAttribute('aria-expanded') === 'true';
+      if (expanded) {
+        closeExportMenu();
       } else {
-        count = text.length;
-        counter.textContent = `Characters: ${count}`;
+        openExportMenu();
       }
+    });
+
+    // Close menu if click outside
+    document.addEventListener('click', (e) => {
+      if (!exportBtn.contains(e.target) && !exportMenu.contains(e.target)) {
+        closeExportMenu();
+      }
+    });
+
+    // Export option click
+    exportMenu.querySelectorAll('button[data-export]').forEach(button => {
+      button.addEventListener('click', async () => {
+        const format = button.getAttribute('data-export');
+        if (format === 'txt') {
+          exportTxt();
+        } else if (format === 'html') {
+          exportHtml();
+        } else if (format === 'pdf') {
+          await exportPdf();
+        }
+        closeExportMenu();
+      });
+    });
+
+    function openExportMenu() {
+      exportMenu.style.display = 'flex';
+      exportBtn.setAttribute('aria-expanded', 'true');
     }
 
-    // Toggle word/character count
-    window.toggleCounter = function () {
-      countMode = countMode === 'words' ? 'chars' : 'words';
-      updateCounter();
-    };
-
-    // Apply pending styles to selection or next typed text
-    function applyPendingStylesToSelectionOrNextTyped() {
-      const selection = window.getSelection();
-      if (!selection) return;
-
-      if (!selection.isCollapsed) {
-        pendingFontSize = null;
-        pendingTextColor = null;
-        pendingHighlightColor = null;
-        return;
-      }
-
-      if (pendingFontSize !== null) {
-        execCmd('fontSize', '7');
-        const fonts = document.getElementsByTagName('font');
-        for (const fontElem of fonts) {
-          if (fontElem.size === '7') {
-            fontElem.removeAttribute('size');
-            fontElem.style.fontSize = pendingFontSize + 'px';
-          }
-        }
-        pendingFontSize = null;
-      }
-      if (pendingTextColor !== null) {
-        execCmd('foreColor', pendingTextColor);
-        pendingTextColor = null;
-      }
-      if (pendingHighlightColor !== null) {
-        execCmd('hiliteColor', pendingHighlightColor);
-        pendingHighlightColor = null;
-      }
+    function closeExportMenu() {
+      exportMenu.style.display = 'none';
+      exportBtn.setAttribute('aria-expanded', 'false');
     }
 
     // Export functions
-    window.exportPDF = function () {
-      if (popupActive) return;
-      const exportWrapper = wrapper.cloneNode(true);
-      exportWrapper.style.backgroundColor = 'white';
-      exportWrapper.style.color = 'black';
-      exportWrapper.querySelectorAll('.page').forEach(page => {
-        page.style.backgroundColor = 'white';
-        page.style.color = 'black';
-        page.style.boxShadow = 'none';
-      });
-      html2pdf()
-        .from(exportWrapper)
-        .set({
-          margin: 10,
-          filename: 'AbhiType.pdf',
-          html2canvas: { scale: 2, backgroundColor: '#ffffff' },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        })
-        .save();
-      localStorage.removeItem('abhiTypeDocPages');
-    };
+    function exportTxt() {
+      const text = editor.innerText;
+      const blob = new Blob([text], {type: 'text/plain'});
+      downloadBlob(blob, 'AbhiTypeDocument.txt');
+    }
 
-    window.exportHTML = function () {
-      if (popupActive) return;
-      const pages = document.querySelectorAll('.page');
-      const content = [...pages]
-        .map(p => p.innerHTML)
-        .join('<hr style="border-color:#ccc;margin:20px 0;">');
-      const htmlContent = `
-        <html>
-          <head>
-            <meta charset="UTF-8" />
-            <title>AbhiType Export</title>
-            <style>
-              body { background: white; color: black; font-family: monospace; padding: 40px; }
-              hr { border: 1px solid #ccc; margin: 20px 0; }
-            </style>
-          </head>
-          <body>${content}</body>
-        </html>
-      `;
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      saveAs(blob, 'AbhiType.html');
-      localStorage.removeItem('abhiTypeDocPages');
-    };
+    function exportHtml() {
+      const content = editor.innerHTML;
+      const htmlDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Abhi Type Export</title>
+<style>
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: white;
+    color: black;
+    margin: 2rem;
+    white-space: pre-wrap;
+  }
+  ul, ol {
+    margin-left: 1.5rem;
+  }
+</style>
+</head>
+<body>
+${content}
+</body>
+</html>`;
 
-    window.exportTXT = function () {
-      if (popupActive) return;
-      const text = [...document.querySelectorAll('.page')]
-        .map(p => p.innerText)
-        .join('\n\n');
-      const blob = new Blob([text], { type: 'text/plain' });
-      saveAs(blob, 'AbhiType.txt');
-      localStorage.removeItem('abhiTypeDocPages');
-    };
+      const blob = new Blob([htmlDoc], {type: 'text/html'});
+      downloadBlob(blob, 'AbhiTypeDocument.html');
+    }
 
-    // Import handler
-    window.handleImport = function (event) {
-      if (popupActive) return;
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        wrapper.innerHTML = '';
-        const newPage = document.createElement('div');
-        newPage.className = 'page';
-        newPage.contentEditable = true;
-        newPage.innerHTML = e.target.result;
-        attachPageEvents(newPage);
-        wrapper.appendChild(newPage);
-        updateRemovePageDropdown();
-        saveToLocalStorage();
-        updateCounter();
-      };
-      if (file.name.endsWith('.txt')) {
-        reader.readAsText(file);
-      } else if (file.name.endsWith('.html')) {
-        reader.readAsText(file);
-      }
-    };
+    async function exportPdf() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-    // Clear all pages
-    window.clearAllPages = function () {
-      if (popupActive) return;
-      if (confirm('Are you sure you want to clear the document?')) {
-        wrapper.innerHTML = '';
-        addNewPage();
-        updateRemovePageDropdown();
-        localStorage.removeItem('abhiTypeDocPages');
-        updateCounter();
-      }
-    };
+      doc.setFont('Courier', 'normal');
+      doc.setFontSize(12);
 
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!removePageDropdown.contains(e.target)) {
-        removePageDropdown.classList.remove('open');
-        removePageDropdown.setAttribute('aria-expanded', 'false');
-      }
-      dropdowns.forEach(({ container }) => {
-        if (!container.contains(e.target)) {
-          container.querySelector('.dropdown-list').classList.remove('open');
-        }
-      });
-    });
+      const text = editor.innerText;
+      const lines = doc.splitTextToSize(text, 180);
 
-    // Accessibility: close dropdowns on ESC key globally
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        removePageDropdown.classList.remove('open');
-        removePageDropdown.setAttribute('aria-expanded', 'false');
-        dropdowns.forEach(({ container }) => {
-          container.querySelector('.dropdown-list').classList.remove('open');
-        });
-      }
-    });
+      doc.text(lines, 10, 10);
+      doc.save('AbhiTypeDocument.pdf');
+    }
+
+    function downloadBlob(blob, filename) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
   </script>
 </body>
 </html>
