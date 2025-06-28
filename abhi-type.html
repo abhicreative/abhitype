@@ -572,7 +572,7 @@
       if (zoomLevel > 3) zoomLevel = 3;
       [...document.querySelectorAll('.page')].forEach(page => {
         page.style.transform = `scale(${zoomLevel})`;
-        page.style.transformOrigin = 'top left';
+        page.style.transformOrigin = 'center center';
       });
     }
     window.adjustZoom = adjustZoom;
