@@ -362,9 +362,10 @@ async function exportPdf() {
         const g = parseInt(rgb[1]);
         const b = parseInt(rgb[2]);
 
-        // Check if color is close to white
-        if (r > 200 && g > 200 && b > 200) {
-          doc.setTextColor(0, 0, 0);  // Force black
+        // If text color is very light, force it to black
+        const brightness = (r * 0.299) + (g * 0.587) + (b * 0.114);
+        if (brightness > 200) {
+          doc.setTextColor(0, 0, 0);
         } else {
           doc.setTextColor(r, g, b);
         }
